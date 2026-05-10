@@ -5,8 +5,19 @@ from typing import Optional, List, Dict, Any
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 
-from vanna_setup import agent, agent_memory, sql_runner, RunSqlTool
+from vanna_setup import agent, agent_memory, sql_runner, RunSqlTool, seed_agent_memory
+import asyncio
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: seed the memory
+    await seed_agent_memory(agent_memory)
+    yield
+    # Shutdown: cleanup if needed
 from vanna.core.user import RequestContext
 from vanna.capabilities.sql_runner import RunSqlToolArgs
 
@@ -72,7 +83,16 @@ def create_chart(columns: List[str], rows: List[List[Any]], chart_type: str = "b
 
 
 
-app = FastAPI(title="Healthcare NL2SQL API", version="1.0.0")
+app = FastAPI(title="Healthcare NL2SQL API", version="1.0.0", lifespan=lifespan)
+
+# CORS Middleware - Allow frontend to communicate with backend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 
