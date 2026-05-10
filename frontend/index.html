@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare NL2SQL - AI Query Assistant</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Plotly.js for charts -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar: Query History & Suggestions -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-history"></i> History</h2>
+                <button class="btn-icon" id="clearHistory" title="Clear History">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+
+            <!-- Suggestion Panel -->
+            <div class="suggestions-panel">
+                <h3><i class="fas fa-lightbulb"></i> Try these</h3>
+                <div class="suggestion-list" id="suggestionList">
+                    <button class="suggestion-chip">How many patients?</button>
+                    <button class="suggestion-chip">Show doctors list</button>
+                    <button class="suggestion-chip">Total revenue</button>
+                    <button class="suggestion-chip">Appointments by month</button>
+                    <button class="suggestion-chip">Unpaid invoices</button>
+                </div>
+            </div>
+
+            <!-- History List -->
+            <div class="history-list" id="historyList"></div>
+
+            <div class="sidebar-footer">
+                <button class="btn-icon" id="toggleTheme" title="Toggle Dark Mode">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <h1><i class="fas fa-hospital-user"></i> Healthcare NL2SQL</h1>
+                    <p class="subtitle">Ask questions in natural language, get SQL results</p>
+                </div>
+                <div class="header-right">
+                    <span class="status-indicator">
+                        <span class="status-dot"></span>
+                        API Connected
+                    </span>
+                </div>
+            </header>
+
+            <!-- Chat Container -->
+            <div class="chat-container" id="chatContainer">
+                <!-- Welcome Message -->
+                <div class="message system-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <p>👋 <strong>Welcome!</strong></p>
+                        <p>I'm your healthcare database assistant. Ask me anything!</p>
+                        <div class="example-grid">
+                            <button class="example-btn" data-question="How many patients do we have?">
+                                <i class="fas fa-users"></i> How many patients?
+                            </button>
+                            <button class="example-btn" data-question="Show revenue by doctor">
+                                <i class="fas fa-chart-bar"></i> Revenue by doctor
+                            </button>
+                            <button class="example-btn" data-question="List all doctors from Delhi">
+                                <i class="fas fa-user-md"></i> Doctors from Delhi
+                            </button>
+                            <button class="example-btn" data-question="Show monthly appointment trend">
+                                <i class="fas fa-chart-line"></i> Monthly trend
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <!-- Auto-complete dropdown -->
+                    <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+
+                    <i class="fas fa-search input-icon"></i>
+                    <input
+                        type="text"
+                        id="questionInput"
+                        placeholder="Ask a question about your database..."
+                        autocomplete="off"
+                    >
+                    <button class="btn-send" id="sendBtn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <p class="input-hint">Press Enter to send • Use suggestions below</p>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="results-panel" id="resultsPanel" style="display: none;">
+                <div class="results-header">
+                    <div class="results-title">
+                        <h3><i class="fas fa-table"></i> Results</h3>
+                        <span class="row-count" id="rowCount"></span>
+                    </div>
+                    <div class="results-actions">
+                        <button class="btn-secondary" id="exportCsvBtn">
+                            <i class="fas fa-download"></i> CSV
+                        </button>
+                        <button class="btn-icon" id="closeResults" title="Close">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SQL Query Display -->
+                <div class="sql-query" id="sqlQuery">
+                    <div class="sql-label">SQL Query</div>
+                    <code></code>
+                </div>
+
+                <!-- Table Controls -->
+                <div class="table-controls">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="tableSearch" placeholder="Search results...">
+                    </div>
+                    <div class="table-pagination">
+                        <select id="pageSize">
+                            <option value="10">10 / page</option>
+                            <option value="20" selected>20 / page</option>
+                            <option value="50">50 / page</option>
+                            <option value="100">100 / page</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Results Table -->
+                <div class="table-container" id="tableContainer">
+                    <table id="resultsTable">
+                        <thead id="tableHead"></thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination">
+                    <button class="btn-pagination" id="firstPage" title="First page">
+                        <i class="fas fa-angle-double-left"></i>
+                    </button>
+                    <button class="btn-pagination" id="prevPage" disabled>
+                        <i class="fas fa-angle-left"></i>
+                    </button>
+                    <span id="pageInfo">Page 1 of 1</span>
+                    <button class="btn-pagination" id="nextPage" disabled>
+                        <i class="fas fa-angle-right"></i>
+                    </button>
+                    <button class="btn-pagination" id="lastPage" title="Last page">
+                        <i class="fas fa-angle-double-right"></i>
+                    </button>
+                </div>
+
+                <!-- Chart Container -->
+                <div class="chart-container" id="chartContainer" style="display: none;">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-chart-pie"></i> Visualization</h4>
+                        <div class="chart-controls">
+                            <button class="chart-btn active" data-type="bar"><i class="fas fa-chart-bar"></i></button>
+                            <button class="chart-btn" data-type="line"><i class="fas fa-chart-line"></i></button>
+                            <button class="chart-btn" data-type="pie"><i class="fas fa-chart-pie"></i></button>
+                        </div>
+                    </div>
+                    <div id="chart"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Loading Overlay with Typing Indicator -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="typing-indicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>
+        <p>Processing your question...</p>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
