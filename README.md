@@ -11,7 +11,7 @@
 
 ---
 
-## 🚀 Demo
+##  Demo
 
 Ask questions in plain English and get instant SQL results with visualizations:
 
@@ -119,7 +119,7 @@ User Question (Natural Language)
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/healthcare-nl2sql.git
+git clone https://github.com/Ramakan-eng/healthcare-nl2sql.git
 cd healthcare-nl2sql
 pip install -r requirements.txt
 ```
@@ -265,10 +265,10 @@ MIT License - feel free to use for learning or commercial projects.
 ## 🤝 Connect With Me
 
 <div align="left">
-  <a href="https://linkedin.com/in/YOUR_LINKEDIN">
+  <a href="https://linkedin.com/in/ramakant-sahu-3608002ab">
     <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
   </a>
-  <a href="https://github.com/YOUR_GITHUB">
+  <a href="https://github.com/Ramakan-eng">
     <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
   </a>
 </div>
